@@ -1,5 +1,6 @@
 #pragma once
 #include "Time.h"
+#include "Scene.h"
 
 class CGameFramework
 {
@@ -96,4 +97,11 @@ public:
 	//윈도우의 메시지(키보드, 마우스 입력)를 처리하는 함수이다.
 
 	void ChangeSwapChainState();
+
+	void MoveToNextFrame();
+
+	UINT64 m_nFenceValues[m_nSwapChainBuffers];
+	// 후면 버퍼마다 펜스값 관리
+	
+	CScene* m_pScene;
 };

@@ -21,7 +21,7 @@
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Project11.h">
+    <ClInclude Include="Project12.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
@@ -36,6 +36,9 @@
     <ClInclude Include="Mesh.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -48,12 +51,9 @@
     <ClInclude Include="Time.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Project11.cpp">
+    <ClCompile Include="Project12.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
@@ -68,6 +68,9 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -80,12 +83,9 @@
     <ClCompile Include="Time.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Project11.rc">
+    <ResourceCompile Include="Project12.rc">
       <Filter>리소스 파일</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -93,7 +93,7 @@
     <Image Include="small.ico">
       <Filter>리소스 파일</Filter>
     </Image>
-    <Image Include="Project11.ico">
+    <Image Include="Project12.ico">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

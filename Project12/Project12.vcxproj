@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{150f828a-b75a-41f4-9ba9-7e84a6c793f4}</ProjectGuid>
-    <RootNamespace>Project11</RootNamespace>
+    <ProjectGuid>{c12a6b61-149d-40ca-ab4c-1acb129e80c3}</ProjectGuid>
+    <RootNamespace>Project12</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -128,7 +128,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="Project11.h" />
+    <ClInclude Include="Project12.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
@@ -142,17 +142,17 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Project11.cpp" />
+    <ClCompile Include="Project12.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Project11.rc" />
+    <ResourceCompile Include="Project12.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Project11.ico" />
+    <Image Include="Project12.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

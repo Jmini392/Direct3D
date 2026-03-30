@@ -50,15 +50,15 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
     return (input.color);
 }
 
-VS_DIFFUSED_OUTPUT VSPlayer(VS_DIFFUSED_INPUT input) {
-    VS_DIFFUSED_OUTPUT output;
+VS_OUTPUT VSPlayer(VS_INPUT input) {
+    VS_OUTPUT output;
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxPlayerWorld), gmtxView), gmtxProjection);
     output.color = input.color;
     
     return (output);
 }
 
-float4 PSPlayer(VS_DIFFUSED_OUTPUT input) : SV_TARGET {
+float4 PSPlayer(VS_OUTPUT input) : SV_TARGET {
     return (input.color);
 }
 

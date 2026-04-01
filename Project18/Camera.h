@@ -48,6 +48,9 @@ protected:
 
 	//카메라를 가지고 있는 플레이어에 대한 포인터이다.
 	CPlayer *m_pPlayer = NULL;
+
+	ID3D12Resource* m_pd3dcbCamera = NULL;
+	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
 public:
 	CCamera();
 	CCamera(CCamera* pCamera);

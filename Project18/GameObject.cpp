@@ -42,8 +42,9 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			m_pMaterial->m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		}
 	}
-
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
+	if (m_d3dCbvGPUDescriptorHandle.ptr != 0) {
+		pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
+	}
 
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
 }

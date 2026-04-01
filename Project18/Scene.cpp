@@ -57,13 +57,14 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	d3dRootSignatureDesc.NumStaticSamplers = 0;
 	d3dRootSignatureDesc.pStaticSamplers = NULL;
 	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
+	
 	ID3DBlob* pd3dSignatureBlob = NULL;
 	ID3DBlob* pd3dErrorBlob = NULL;
-	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
-		&pd3dSignatureBlob, &pd3dErrorBlob);
-	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(),
-		pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void
-			**)&pd3dGraphicsRootSignature);
+	
+	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
+	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(),
+		__uuidof(ID3D12RootSignature), (void**)&pd3dGraphicsRootSignature);
+	
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 	
@@ -92,16 +93,18 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	UINT nCbvSrvDescriptorIncrementSize = pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dCbvCPUDescriptorStartHandle =
-		m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorStartHandle =
-		m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dCbvCPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	
 	m_d3dMaterialsCbvCPUDescriptorHandle = d3dCbvCPUDescriptorStartHandle;
 	m_d3dMaterialsCbvGPUDescriptorHandle = d3dCbvGPUDescriptorStartHandle;
+	
 	m_d3dLightsCbvCPUDescriptorHandle.ptr = d3dCbvCPUDescriptorStartHandle.ptr + nCbvSrvDescriptorIncrementSize;
 	m_d3dLightsCbvGPUDescriptorHandle.ptr = d3dCbvGPUDescriptorStartHandle.ptr + nCbvSrvDescriptorIncrementSize;
+	
 	m_d3dObjectsCbvCPUDescriptorHandle.ptr = d3dCbvCPUDescriptorStartHandle.ptr + (nCbvSrvDescriptorIncrementSize * 2);
 	m_d3dObjectsCbvGPUDescriptorHandle.ptr = d3dCbvGPUDescriptorStartHandle.ptr + (nCbvSrvDescriptorIncrementSize * 2);
+	
 	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList, m_d3dObjectsCbvCPUDescriptorHandle, m_d3dObjectsCbvGPUDescriptorHandle);
 	
 	BuildLightsAndMaterials();
@@ -116,9 +119,13 @@ void CScene::ReleaseObjects() {
 		m_pShaders[i].ReleaseShaderVariables();
 		m_pShaders[i].ReleaseObjects();
 	}
+	
 	if (m_pShaders) delete[] m_pShaders;
+	
 	if (m_pLights) delete m_pLights;
+	
 	if (m_pMaterials) delete m_pMaterials;
+	
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 }
 
@@ -147,11 +154,14 @@ void CScene::AnimateObjects(float fTimeElapsed) {
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
+
 	UpdateShaderVariables(pd3dCommandList);
-	pd3dCommandList->SetGraphicsRootDescriptorTable(3,
-		m_d3dMaterialsCbvGPUDescriptorHandle);
+
+	pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_d3dMaterialsCbvGPUDescriptorHandle);
+	
 	for (int i = 0; i < m_nShaders; i++) {
 		m_pShaders[i].Render(pd3dCommandList, pCamera);
 	}
@@ -177,6 +187,7 @@ void CScene::BuildLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(130.0f, 30.0f, 30.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 50.0f;
@@ -189,12 +200,14 @@ void CScene::BuildLightsAndMaterials()
 	m_pLights->m_pLights[1].m_fFalloff = 8.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	
 	m_pLights->m_pLights[3].m_bEnable = true;
 	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[3].m_fRange = 60.0f;
@@ -210,36 +223,34 @@ void CScene::BuildLightsAndMaterials()
 	
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
-	m_pMaterials->m_pReflections[0] = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f,
-	0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 5.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f,
-	1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[2] = { XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f,
-	0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[3] = { XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f,
-	0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[4] = { XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f,
-	0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 25.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[5] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.0f,
-	0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[6] = { XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f,
-	0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[7] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f,
-	0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[0] = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 5.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[2] = { XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[3] = { XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[4] = { XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 25.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[5] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[6] = { XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[7] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 }
 
 void CScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {
 	UINT ncbLightsBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
-	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
-		ncbLightsBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
-		NULL);
+	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbLightsBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 	
 	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
-	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
-		ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD,
-		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 	

@@ -100,21 +100,41 @@ void CCamera::RegenerateViewMatrix() {
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
 }
 
-void CCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
+void CCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {
+	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255);
+	m_pd3dcbCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	// CPU에서 계속해서 값을 쓸 수 있도록 버퍼를 매핑합니다.
+	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
+}
 
 void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) {
 	XMFLOAT4X4 xmf4x4View;
 	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
-	
-	//루트 파라메터 인덱스 1의
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4View, 0);
 
 	XMFLOAT4X4 xmf4x4Projection;
 	XMStoreFloat4x4(&xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4Projection, 16);
+
+	if (m_pcbMappedCamera) {
+		// 매핑된 버퍼에 전치 행렬 적용 결과값 복사
+		m_pcbMappedCamera->m_xmf4x4View = xmf4x4View;
+		m_pcbMappedCamera->m_xmf4x4Projection = xmf4x4Projection;
+
+		// 루트 시그니쳐 인덱스 1번에 파라미터를 세팅
+		D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(1, d3dGpuVirtualAddress);
+	}
 }
 
-void CCamera::ReleaseShaderVariables() { }
+void CCamera::ReleaseShaderVariables() {
+	if (m_pd3dcbCamera) {
+		m_pd3dcbCamera->Unmap(0, NULL);
+		m_pd3dcbCamera->Release();
+		m_pd3dcbCamera = NULL;
+	}
+}
 
 void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList) {
 	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);

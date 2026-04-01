@@ -316,13 +316,14 @@ void CObjectsShader::ReleaseUploadBuffers() {
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {
 	CShader::Render(pd3dCommandList, pCamera);
 	UpdateShaderVariables(pd3dCommandList);
-	UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcbGameObjects->GetGPUVirtualAddress();
+
 	for (int j = 0; j < m_nObjects; j++) {
 		if (m_ppObjects[j]) {
-			//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbGameObjectGpuVirtualAddress + (ncbGameObjectBytes * j));
-			pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_ppObjects[j]->GetCbvGPUDescriptorHandle());
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+			// 디스크립터 핸들이 유효한지 확인하고 렌더링을 진행합니다 (루트 시그니처 인덱스 2번)
+			if (m_ppObjects[j]->GetCbvGPUDescriptorHandle().ptr != 0) {
+				pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_ppObjects[j]->GetCbvGPUDescriptorHandle());
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+			}
 		}
 	}
 }
